@@ -1,0 +1,463 @@
+/* Enhanced styles for MELODIOUS MALEFICARUM v1.2 */
+
+/* --- Reduced Glassmorphism --- */
+:root {
+  /* Drastically reduced backdrop effects */
+  --glass-opacity-frame: 0.05;  /* Dramatically reduced from original */
+  --glass-opacity-module: 0.08; /* Dramatically reduced from original */
+  --element-opacity-control-bg: 0.1;
+  
+  /* Enhanced glows */
+  --glow-accent-bright: #b29fff;
+  --glow-accent-ultra: #d0c1ff;
+  --shadow-glow-accent-strong: 0 0 18px 4px rgba(138, 127, 255, 0.8);
+  
+  /* New variables for enhanced effects */
+  --morphing-transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* --- Main Frame & Visualizer --- */
+.main-frame {
+  background: rgba(var(--element-base-color-rgb), var(--glass-opacity-frame));
+  backdrop-filter: blur(2px); /* Reduced blur */
+  border: 1px solid rgba(var(--accent-color-rgb), 0.15);
+}
+
+.visualizer-area {
+  position: relative;
+  border: 1px solid rgba(var(--accent-color-secondary-rgb), 0.1);
+  transition: var(--morphing-transition);
+}
+
+/* Interactive visualizer states */
+.visualizer-area.interactive {
+  cursor: crosshair;
+  border-color: rgba(138, 127, 255, 0.3);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8),
+              0 0 10px rgba(138, 127, 255, 0.3);
+}
+
+.visualizer-area.active {
+  border-color: rgba(138, 127, 255, 0.6);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8),
+              0 0 15px rgba(138, 127, 255, 0.5);
+}
+
+/* XY position indicator in visualizer */
+.visualizer-xy-indicator {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(138, 127, 255, 0.9) 0%, rgba(138, 127, 255, 0) 70%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 10;
+  box-shadow: 0 0 15px rgba(138, 127, 255, 0.8);
+  transition: opacity 0.3s ease;
+}
+
+/* Visualizer mode toggle button */
+.visualizer-mode-toggle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 20;
+  background: rgba(var(--element-base-color-rgb), 0.3);
+  color: var(--text-color-primary);
+  border: 1px solid rgba(var(--accent-color-rgb), 0.3);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.visualizer-mode-toggle:hover {
+  background: rgba(var(--element-base-color-rgb), 0.5);
+  border-color: rgba(var(--accent-color-rgb), 0.6);
+  box-shadow: 0 0 8px rgba(138, 127, 255, 0.5);
+}
+
+/* --- Enhanced Module Morphing --- */
+.control-module {
+  background: rgba(var(--element-base-color-rgb), var(--glass-opacity-module));
+  backdrop-filter: blur(1px); /* Almost no blur */
+  border: 1px solid rgba(var(--accent-color-secondary-rgb), 0.1);
+  transition: var(--morphing-transition);
+}
+
+/* Default state for all modules */
+.controls-area .control-module {
+  opacity: 0.85; /* More visible by default */
+  transform: scale(0.98) translateZ(-10px);
+}
+
+/* When a module has focus */
+.controls-area .control-module.focused {
+  opacity: 1;
+  transform: scale(1.02) translateZ(15px);
+  z-index: 10;
+  box-shadow: var(--shadow-depth), var(--shadow-glow-accent-strong);
+  background: rgba(var(--element-base-color-rgb), 0.25) !important;
+  animation: pulseFocus 2s ease-in-out infinite alternate;
+}
+
+/* When another module has focus, reduce others more dramatically */
+.controls-area.has-focus .control-module:not(.focused) {
+  opacity: 0.4;
+  transform: scale(0.92) translateZ(-30px);
+  filter: blur(1px);
+}
+
+/* Animation for focused module */
+@keyframes pulseFocus {
+  0% { box-shadow: var(--shadow-depth), 0 0 15px var(--glow-accent); }
+  100% { box-shadow: var(--shadow-depth), 0 0 22px var(--glow-accent-bright); }
+}
+
+/* --- Enhanced Text --- */
+.module-title {
+  font-family: var(--font-arcane);
+  font-size: 16px;
+  letter-spacing: 2px;
+  color: var(--text-color-accent);
+  text-shadow: 0 0 5px var(--glow-accent-faint),
+               0 0 10px var(--glow-accent-faint),
+               0 0 15px rgba(var(--glow-magenta-rgb), 0.5),
+               2px 2px 2px rgba(0,0,0,0.7);
+  animation: textPulse 3s infinite alternate;
+  position: relative;
+  overflow: hidden;
+}
+
+.module-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--accent-color) 50%,
+    transparent 100%
+  );
+  animation: scanline 3s linear infinite;
+}
+
+@keyframes textPulse {
+  0% { text-shadow: 0 0 5px var(--glow-accent-faint),
+                   0 0 10px var(--glow-accent-faint),
+                   0 0 15px rgba(var(--glow-magenta-rgb), 0.5); }
+  100% { text-shadow: 0 0 8px var(--glow-accent),
+                     0 0 15px var(--glow-accent-faint),
+                     0 0 20px rgba(var(--glow-magenta-rgb), 0.7); }
+}
+
+@keyframes scanline {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* --- Enhanced Mode Switch --- */
+.mode-switch-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(145deg, #262333, #1a1727);
+  border: 1px solid rgba(138, 127, 255, 0.3);
+  border-radius: 5px;
+  padding: 5px 10px;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  color: var(--text-color-secondary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mode-switch-button:hover {
+  color: var(--text-color-primary);
+  border-color: rgba(138, 127, 255, 0.6);
+  box-shadow: 0 0 10px rgba(138, 127, 255, 0.5);
+}
+
+.mode-switch-button .switch-track {
+  width: 24px;
+  height: 14px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 7px;
+  position: relative;
+}
+
+.mode-switch-button .switch-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  top: 2px;
+  left: 2px;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              background-color 0.3s ease;
+  box-shadow: 0 0 5px rgba(138, 127, 255, 0.5);
+}
+
+.mode-switch-button.xy .switch-handle {
+  transform: translateX(10px);
+  background: var(--accent-color-light);
+  box-shadow: 0 0 8px var(--accent-color);
+}
+
+/* Input container switching animation */
+.input-module-container.switching {
+  animation: moduleSwitch 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes moduleSwitch {
+  0% { transform: scale(1) translateZ(0); opacity: 1; }
+  50% { transform: scale(0.9) translateZ(-30px); opacity: 0.5; }
+  100% { transform: scale(1) translateZ(0); opacity: 1; }
+}
+
+/* --- Enhanced Preset Selector --- */
+.preset-wheel-container {
+  position: relative;
+  margin-bottom: 10px;
+  height: 40px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.preset-wheel {
+  position: relative;
+  display: flex;
+  border-radius: 20px;
+  background: rgba(var(--element-base-color-rgb), 0.2);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.5),
+              0 0 10px rgba(138, 127, 255, 0.5);
+  border: 1px solid rgba(138, 127, 255, 0.3);
+  padding: 5px;
+  overflow-x: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  white-space: nowrap;
+  max-width: 90%;
+}
+
+.preset-wheel::-webkit-scrollbar {
+  display: none;
+}
+
+.preset-label {
+  position: sticky;
+  left: 0;
+  font-family: var(--font-arcane);
+  font-size: 14px;
+  color: var(--accent-color);
+  text-shadow: 0 0 5px rgba(138, 127, 255, 0.5);
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(90deg, 
+    rgba(var(--element-base-color-rgb), 0.8), 
+    rgba(var(--element-base-color-rgb), 0.2)
+  );
+  z-index: 2;
+}
+
+.preset-wheel-item {
+  padding: 5px 10px;
+  margin: 0 5px;
+  border-radius: 15px;
+  font-family: var(--font-terminal);
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  background: transparent;
+  color: var(--text-color-secondary);
+  display: inline-block;
+}
+
+.preset-wheel-item.active {
+  background: rgba(138, 127, 255, 0.3);
+  color: var(--text-color-primary);
+  box-shadow: 0 0 8px rgba(138, 127, 255, 0.5);
+  transform: scale(1.1);
+}
+
+/* --- Enhanced Slider Styling --- */
+.styled-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: var(--slider-track-height);
+  background: transparent; /* Hide original track */
+  cursor: pointer;
+  outline: none;
+  margin: 0;
+  padding: 0;
+}
+
+.slider-wrapper::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: var(--slider-track-height);
+  width: calc(var(--slider-progress, 0) * 100%);
+  background: linear-gradient(90deg, 
+    var(--slider-track-active-color),
+    var(--accent-color-light)
+  );
+  border-radius: calc(var(--slider-track-height) / 2);
+  pointer-events: none;
+  z-index: 1;
+  border: 1px solid rgba(0,0,0,0.2);
+  box-shadow: 0 0 5px rgba(var(--glow-cyan-rgb), 0.8);
+  transition: width 0.2s linear, box-shadow 0.3s ease;
+}
+
+.slider-unit:hover .slider-wrapper::before {
+  box-shadow: 0 0 8px rgba(var(--glow-cyan-rgb), 1.0);
+}
+
+.styled-slider::-webkit-slider-thumb {
+  background: linear-gradient(145deg, var(--accent-color-light), var(--slider-thumb-color));
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.5),
+              -1px -1px 2px rgba(255,255,255,0.1),
+              0 0 8px var(--glow-accent);
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+              box-shadow 0.2s ease;
+}
+
+.styled-slider:hover::-webkit-slider-thumb {
+  transform: scale(1.2);
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.5),
+              -1px -1px 2px rgba(255,255,255,0.1),
+              0 0 12px var(--glow-accent-bright);
+}
+
+/* --- Enhanced Keyboard --- */
+.keyboard-key {
+  position: relative;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.15s ease-out,
+              border-color 0.15s ease-out,
+              box-shadow 0.15s ease-out,
+              transform 0.1s ease-out;
+  overflow: hidden;
+}
+
+.keyboard-key.white {
+  background: rgba(45, 40, 65, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.5),
+              inset 0 -10px 20px rgba(0,0,0,0.2);
+}
+
+.keyboard-key.black {
+  background: rgba(30, 30, 40, 0.4);
+  border: 1px solid rgba(0, 0, 0, 0.5);
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.6), 
+              inset 0 0 1px rgba(255, 255, 255, 0.05),
+              inset 0 -5px 10px rgba(0,0,0,0.3);
+}
+
+.keyboard-key:hover {
+  background: rgba(var(--key-bg-color-rgb), calc(var(--key-bg-opacity) + 0.2));
+  border-color: rgba(var(--accent-color-rgb), 0.3);
+  box-shadow: inset 0 1px 1px rgba(0,0,0,0.5),
+              inset 0 -10px 20px rgba(0,0,0,0.2),
+              0 0 5px var(--glow-accent-faint);
+}
+
+.keyboard-key.active {
+  background: rgba(var(--accent-color-rgb), 0.5);
+  box-shadow: inset 0 2px 3px rgba(0,0,0,0.8),
+              inset 0 -5px 10px rgba(0,0,0,0.3),
+              0 0 8px var(--glow-accent);
+  border-color: rgba(var(--accent-color-rgb), 0.8);
+  transform: scale(0.96);
+}
+
+.keyboard-key.black.active {
+  transform: translateX(-50%) scale(0.95);
+}
+
+/* Enhanced key animations */
+@keyframes overlay-press {
+  from { --overlay-opacity: 0.8; --overlay-radius: 0%; }
+  to { --overlay-opacity: 0.7; --overlay-radius: 60%; }
+}
+
+@keyframes overlay-release {
+  from { --overlay-opacity: 0.6; --overlay-radius: 60%; }
+  to { --overlay-opacity: 0; --overlay-radius: 150%; }
+}
+
+/* --- Tooltip --- */
+.maleficarum-tooltip {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(30, 30, 40, 0.8);
+  color: #e8ebf0;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  box-shadow: 0 0 10px rgba(138, 127, 255, 0.5),
+              0 0 20px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(138, 127, 255, 0.3);
+  text-shadow: 0 0 5px rgba(138, 127, 255, 0.5);
+}
+
+/* --- Particle System --- */
+.particle-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 768px) {
+  .xy-pad {
+    max-width: 130px;
+    max-height: 130px;
+  }
+  
+  .module-title {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  
+  .controls-area .control-module.focused {
+    transform: scale(1.04) translateZ(5px);
+  }
+  
+  .preset-wheel {
+    max-width: 80%;
+  }
+}

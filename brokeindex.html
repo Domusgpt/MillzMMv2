@@ -1,0 +1,432 @@
+import React, { useState, useEffect, useRef } from 'react';
+
+const EnhancedMaleficarumUI = () => {
+  // Application state
+  const [activeInputMode, setActiveInputMode] = useState('keyboard'); // 'keyboard' or 'xy'
+  const [focusedModule, setFocusedModule] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentPreset, setCurrentPreset] = useState('grimoire_pulse');
+  const [parameters, setParameters] = useState({
+    'filter': 0.5,
+    'resonance': 0.1,
+    'attack': 0.1,
+    'release': 0.3
+  });
+  const [toggles, setToggles] = useState({
+    'delay': false,
+    'reverb': false,
+    'arpeggiator': false,
+    'glitch': false
+  });
+  const [xyPosition, setXyPosition] = useState({ x: 0.5, y: 0.5, active: false });
+  
+  // References
+  const canvasRef = useRef(null);
+  const xyPadRef = useRef(null);
+  const xyCursorRef = useRef(null);
+  
+  // Simulated function for demonstration
+  const handleModuleFocus = (moduleName) => {
+    setFocusedModule(moduleName);
+  };
+
+  // Handle XY pad interaction
+  const handleXYPadInteraction = (e) => {
+    if (!xyPadRef.current) return;
+    
+    const rect = xyPadRef.current.getBoundingClientRect();
+    const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    const y = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
+    
+    setXyPosition({ x, y, active: true });
+    setIsPlaying(true);
+    
+    // Update cursor position
+    if (xyCursorRef.current) {
+      xyCursorRef.current.style.left = `${x * 100}%`;
+      xyCursorRef.current.style.top = `${y * 100}%`;
+    }
+  };
+  
+  // Handle parameter changes
+  const handleParameterChange = (param, value) => {
+    setParameters({
+      ...parameters,
+      [param]: value
+    });
+  };
+  
+  // Handle toggle changes
+  const handleToggleChange = (effect) => {
+    setToggles({
+      ...toggles,
+      [effect]: !toggles[effect]
+    });
+  };
+  
+  // Simulated canvas animation
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    let animationId;
+    
+    const animate = () => {
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw background
+      ctx.fillStyle = 'rgba(10, 8, 16, 0.2)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw hypercube visualization (simple placeholder)
+      const time = Date.now() * 0.001;
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      
+      // Add some "hypercube" lines
+      ctx.strokeStyle = `rgba(138, 127, 255, ${parameters.filter * 0.8})`;
+      ctx.lineWidth = 2;
+      
+      for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * Math.PI * 2 + time * parameters.resonance;
+        const radius = 100 + Math.sin(time * 3) * 20;
+        
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(
+          centerX + Math.cos(angle) * radius,
+          centerY + Math.sin(angle) * radius
+        );
+        ctx.stroke();
+      }
+      
+      // Add grid
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.2)';
+      ctx.lineWidth = 1;
+      const gridSize = 20 + parameters.attack * 20;
+      
+      for (let x = 0; x < canvas.width; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      
+      for (let y = 0; y < canvas.height; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+      
+      // Add glitch effect if enabled
+      if (toggles.glitch) {
+        const glitchX = Math.random() * canvas.width;
+        const glitchY = Math.random() * canvas.height;
+        const glitchW = Math.random() * 100;
+        const glitchH = Math.random() * 10;
+        
+        ctx.fillStyle = 'rgba(255, 0, 255, 0.3)';
+        ctx.fillRect(glitchX, glitchY, glitchW, glitchH);
+      }
+      
+      animationId = requestAnimationFrame(animate);
+    };
+    
+    animate();
+    
+    return () => {
+      cancelAnimationFrame(animationId);
+    };
+  }, [parameters, toggles]);
+  
+  return (
+    <div className="app-container">
+      {/* Canvas for WebGL visualization */}
+      <canvas 
+        ref={canvasRef} 
+        className="hypercube-canvas"
+        width={800}
+        height={600}
+      />
+      
+      <div className="main-frame">
+        {/* Visualizer Area (Now Interactive) */}
+        <div 
+          className="visualizer-area"
+          onClick={(e) => {
+            if (focusedModule) {
+              setFocusedModule(null);
+            } else {
+              handleXYPadInteraction(e);
+            }
+          }}
+        >
+          {/* CRT Scanline Overlay */}
+          <div className="crt-overlay"></div>
+        </div>
+        
+        {/* Preset Selector */}
+        <div className="preset-selector-container">
+          <label className="preset-label">SCROLLS:</label>
+          <select 
+            className="preset-select"
+            value={currentPreset}
+            onChange={(e) => setCurrentPreset(e.target.value)}
+          >
+            <option value="vaporwave">VAPORWAVE</option>
+            <option value="ambient_drone">AMBIENT DRONE</option>
+            <option value="synthwave_lead">SYNTHWAVE LEAD</option>
+            <option value="grimoire_pulse">GRIMOIRE PULSE</option>
+          </select>
+          
+          {/* Mode Switch Button (Enhanced) */}
+          <button 
+            className={`mode-switch-button ${activeInputMode}`}
+            onClick={() => setActiveInputMode(activeInputMode === 'keyboard' ? 'xy' : 'keyboard')}
+          >
+            <span className="mode-indicator">MODE: {activeInputMode === 'keyboard' ? 'KYBD' : 'XY'}</span>
+            <div className="switch-track">
+              <div className="switch-handle"></div>
+            </div>
+          </button>
+        </div>
+        
+        {/* Controls Area */}
+        <div className={`controls-area ${focusedModule ? 'has-focus' : ''}`}>
+          {/* Input Module Container */}
+          <div 
+            className={`control-module input-module-container ${focusedModule === 'input' ? 'focused' : ''}`}
+            data-active-input={activeInputMode}
+            onClick={() => handleModuleFocus('input')}
+          >
+            {/* XY Pad Module */}
+            <div className="control-module xy-pad-module sub-module" tabIndex={activeInputMode === 'xy' ? 0 : -1}>
+              <div className="module-title">SONIC NEXUS</div>
+              <div 
+                className={`xy-pad ${xyPosition.active ? 'active' : ''}`}
+                ref={xyPadRef}
+                onMouseDown={handleXYPadInteraction}
+                onMouseMove={(e) => xyPosition.active && handleXYPadInteraction(e)}
+                onMouseUp={() => setXyPosition({...xyPosition, active: false})}
+                onMouseLeave={() => xyPosition.active && setXyPosition({...xyPosition, active: false})}
+              >
+                <div 
+                  className="xy-cursor" 
+                  ref={xyCursorRef}
+                  style={{left: `${xyPosition.x * 100}%`, top: `${xyPosition.y * 100}%`}}
+                ></div>
+                <div className="xy-idle-visual">
+                  <div className="freq-bar"></div>
+                  <div className="freq-bar"></div>
+                  <div className="freq-bar"></div>
+                  <div className="freq-bar"></div>
+                  <div className="freq-bar"></div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Keyboard Module */}
+            <div className="control-module keyboard-module sub-module" tabIndex={activeInputMode === 'keyboard' ? 0 : -1}>
+              <div className="module-title">NOTE INPUT // OCTAVE C4-C5</div>
+              <div className="keyboard">
+                {/* White keys */}
+                <div className={`keyboard-key white ${isPlaying ? 'active' : ''}`} data-note="C4">
+                  <div className="key-overlay"></div>
+                </div>
+                <div className="keyboard-key white" data-note="D4">
+                  <div className="key-overlay"></div>
+                </div>
+                <div className="keyboard-key white" data-note="E4">
+                  <div className="key-overlay"></div>
+                </div>
+                <div className="keyboard-key white" data-note="F4">
+                  <div className="key-overlay"></div>
+                </div>
+                <div className="keyboard-key white" data-note="G4">
+                  <div className="key-overlay"></div>
+                </div>
+                <div className="keyboard-key white" data-note="A4">
+                  <div className="key-overlay"></div>
+                </div>
+                <div className="keyboard-key white" data-note="B4">
+                  <div className="key-overlay"></div>
+                </div>
+                <div className="keyboard-key white" data-note="C5">
+                  <div className="key-overlay"></div>
+                </div>
+                
+                {/* Black keys */}
+                <div className="keyboard-key black" data-note="C#4" style={{left: 'calc(100% / 8 * 0.70)'}}>
+                  <div className="key-overlay"></div>
+                </div>
+                <div className="keyboard-key black" data-note="D#4" style={{left: 'calc(100% / 8 * 1.75)'}}>
+                  <div className="key-overlay"></div>
+                </div>
+                <div className="keyboard-key black" data-note="F#4" style={{left: 'calc(100% / 8 * 3.70)'}}>
+                  <div className="key-overlay"></div>
+                </div>
+                <div className="keyboard-key black" data-note="G#4" style={{left: 'calc(100% / 8 * 4.70)'}}>
+                  <div className="key-overlay"></div>
+                </div>
+                <div className="keyboard-key black" data-note="A#4" style={{left: 'calc(100% / 8 * 5.75)'}}>
+                  <div className="key-overlay"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Parameters & Effects Module */}
+          <div 
+            className={`control-module params-effects-module ${focusedModule === 'params' ? 'focused' : ''}`}
+            onClick={() => handleModuleFocus('params')}
+          >
+            <div className="module-title">PARAMETER MATRIX // EFFECTORS</div>
+            <div className="sliders-grid">
+              {/* Filter Cutoff Slider */}
+              <div className="slider-unit">
+                <label className="slider-label">FLT.CUT</label>
+                <div className="slider-wrapper" style={{'--slider-progress': parameters.filter}}>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="1000" 
+                    value={parameters.filter * 1000} 
+                    step="1" 
+                    className="styled-slider"
+                    onChange={(e) => handleParameterChange('filter', parseInt(e.target.value) / 1000)}
+                  />
+                </div>
+              </div>
+              
+              {/* Filter Resonance Slider */}
+              <div className="slider-unit">
+                <label className="slider-label">FLT.RES</label>
+                <div className="slider-wrapper" style={{'--slider-progress': parameters.resonance}}>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="1000" 
+                    value={parameters.resonance * 1000} 
+                    step="1" 
+                    className="styled-slider"
+                    onChange={(e) => handleParameterChange('resonance', parseInt(e.target.value) / 1000)}
+                  />
+                </div>
+              </div>
+              
+              {/* Envelope Attack Slider */}
+              <div className="slider-unit">
+                <label className="slider-label">ENV.ATK</label>
+                <div className="slider-wrapper" style={{'--slider-progress': parameters.attack}}>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="1000" 
+                    value={parameters.attack * 1000} 
+                    step="1" 
+                    className="styled-slider"
+                    onChange={(e) => handleParameterChange('attack', parseInt(e.target.value) / 1000)}
+                  />
+                </div>
+              </div>
+              
+              {/* Envelope Release Slider */}
+              <div className="slider-unit">
+                <label className="slider-label">ENV.REL</label>
+                <div className="slider-wrapper" style={{'--slider-progress': parameters.release}}>
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="1000" 
+                    value={parameters.release * 1000} 
+                    step="1" 
+                    className="styled-slider"
+                    onChange={(e) => handleParameterChange('release', parseInt(e.target.value) / 1000)}
+                  />
+                </div>
+              </div>
+            </div>
+            
+            {/* Toggles Section */}
+            <div className="toggles-section">
+              <div className="toggles-grid">
+                {/* Delay Toggle */}
+                <div className="toggle-unit">
+                  <label className="toggle-switch">
+                    <input 
+                      type="checkbox" 
+                      checked={toggles.delay}
+                      onChange={() => handleToggleChange('delay')}
+                    />
+                    <span className="switch-base">
+                      <span className="switch-handle"></span>
+                      <span className="switch-label-on">ON</span>
+                      <span className="switch-label-off">OFF</span>
+                    </span>
+                  </label>
+                  <label className="toggle-label">[ DELAY ]</label>
+                </div>
+                
+                {/* Reverb Toggle */}
+                <div className="toggle-unit">
+                  <label className="toggle-switch">
+                    <input 
+                      type="checkbox" 
+                      checked={toggles.reverb}
+                      onChange={() => handleToggleChange('reverb')}
+                    />
+                    <span className="switch-base">
+                      <span className="switch-handle"></span>
+                      <span className="switch-label-on">ON</span>
+                      <span className="switch-label-off">OFF</span>
+                    </span>
+                  </label>
+                  <label className="toggle-label">[ REVERB ]</label>
+                </div>
+                
+                {/* Glitch Toggle */}
+                <div className="toggle-unit">
+                  <label className="toggle-switch">
+                    <input 
+                      type="checkbox" 
+                      checked={toggles.glitch}
+                      onChange={() => handleToggleChange('glitch')}
+                    />
+                    <span className="switch-base">
+                      <span className="switch-handle"></span>
+                      <span className="switch-label-on">ON</span>
+                      <span className="switch-label-off">OFF</span>
+                    </span>
+                  </label>
+                  <label className="toggle-label">[ GLITCH ]</label>
+                </div>
+                
+                {/* Arpeggiator Toggle */}
+                <div className="toggle-unit">
+                  <label className="toggle-switch">
+                    <input 
+                      type="checkbox" 
+                      checked={toggles.arpeggiator}
+                      onChange={() => handleToggleChange('arpeggiator')}
+                    />
+                    <span className="switch-base">
+                      <span className="switch-handle"></span>
+                      <span className="switch-label-on">ON</span>
+                      <span className="switch-label-off">OFF</span>
+                    </span>
+                  </label>
+                  <label className="toggle-label">[ ARP ]</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EnhancedMaleficarumUI;
